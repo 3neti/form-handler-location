@@ -39,7 +39,13 @@
         }
     },
     "scripts": {
-        "test": "pest"
+        "test": "pest",
+        "post-install-cmd": [
+            "@php -r \"file_exists('../../artisan') && system('cd ../.. && php artisan location-handler:install --no-interaction 2>/dev/null || true');\""
+        ],
+        "post-update-cmd": [
+            "@php -r \"file_exists('../../artisan') && system('cd ../.. && php artisan location-handler:install --no-interaction 2>/dev/null || true');\""
+        ]
     },
     "config": {
         "allow-plugins": {

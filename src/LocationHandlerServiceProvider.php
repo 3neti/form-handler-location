@@ -6,6 +6,7 @@ namespace LBHurtado\FormHandlerLocation;
 
 use Illuminate\Support\ServiceProvider;
 use LBHurtado\FormFlowManager\Services\DriverRegistry;
+use LBHurtado\FormHandlerLocation\Console\InstallLocationHandlerCommand;
 
 /**
  * Location Handler Service Provider
@@ -36,6 +37,13 @@ class LocationHandlerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register console commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                InstallLocationHandlerCommand::class,
+            ]);
+        }
+        
         // Register test routes (only in local/testing)
         if (!$this->app->isProduction()) {
             $this->loadRoutesFrom(__DIR__.'/../routes/test.php');
