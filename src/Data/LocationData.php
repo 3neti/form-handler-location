@@ -18,7 +18,7 @@ class LocationData extends Data
         public float $longitude,
         public ?string $formatted_address = null,
         public ?array $address_components = null,
-        public ?string $snapshot = null, // base64 map image
+        public ?string $map = null, // base64 map image
         public ?string $timestamp = null,
         public ?float $accuracy = null,
     ) {}

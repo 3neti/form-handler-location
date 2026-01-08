@@ -34,7 +34,7 @@ class LocationHandler implements FormHandlerInterface
             'longitude' => 'required|numeric|between:-180,180',
             'formatted_address' => 'nullable|string|max:500',
             'address_components' => 'nullable|array',
-            'snapshot' => 'nullable|string', // base64 encoded image
+            'map' => 'nullable|string', // base64 encoded image
             'accuracy' => 'nullable|numeric|min:0',
         ])->validate();
         
