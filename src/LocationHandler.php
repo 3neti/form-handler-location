@@ -12,7 +12,7 @@ use LBHurtado\FormHandlerLocation\Data\LocationData;
 
 /**
  * Location Handler
- * 
+ *
  * Captures user's geographic location using browser geolocation API.
  * Supports reverse geocoding and map snapshots.
  */
@@ -22,12 +22,12 @@ class LocationHandler implements FormHandlerInterface
     {
         return 'location';
     }
-    
+
     public function handle(Request $request, FormFlowStepData $step, array $context = []): array
     {
         // Extract data from 'data' key if present (from form submission)
         $inputData = $request->input('data', $request->all());
-        
+
         // Validate using Laravel's validator directly
         $validated = validator($inputData, [
             'latitude' => 'required|numeric|between:-90,90',
@@ -37,22 +37,22 @@ class LocationHandler implements FormHandlerInterface
             'map' => 'nullable|string', // base64 encoded image
             'accuracy' => 'nullable|numeric|min:0',
         ])->validate();
-        
+
         $validated['timestamp'] = now()->toIso8601String();
-        
+
         return LocationData::from($validated)->toArray();
     }
-    
+
     public function validate(array $data, array $rules): bool
     {
         // Validation handled in handle() method
         return true;
     }
-    
+
     public function render(FormFlowStepData $step, array $context = [])
     {
         // Renders page at resources/js/pages/form-flow/location/LocationCapturePage.vue
-        
+
         return Inertia::render('form-flow/location/LocationCapturePage', [
             'flow_id' => $context['flow_id'] ?? null,
             'step' => (string) ($context['step_index'] ?? 0),
@@ -64,9 +64,10 @@ class LocationHandler implements FormHandlerInterface
                 'capture_snapshot' => config('location-handler.capture_snapshot', true),
                 'require_address' => config('location-handler.require_address', false),
             ], $step->config),
+            'ui_variant' => $step->config['ui_variant'] ?? config('form-flow.ui.variant', 'default'),
         ]);
     }
-    
+
     public function getConfigSchema(): array
     {
         return [
@@ -75,6 +76,7 @@ class LocationHandler implements FormHandlerInterface
             'mapbox_token' => 'required_if:map_provider,mapbox|nullable|string',
             'capture_snapshot' => 'boolean',
             'require_address' => 'boolean',
+            'ui_variant' => 'nullable|string|in:default,compact,immersive',
         ];
     }
 }

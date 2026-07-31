@@ -114,7 +114,7 @@ The handler returns the following data structure:
         'country' => 'Philippines',
         'postal_code' => '1200'
     ],
-    'snapshot' => 'data:image/png;base64,iVBORw0KG...',  // Map image
+    'map' => 'data:image/png;base64,iVBORw0KG...',  // Map image
     'accuracy' => 10.5,  // meters
     'timestamp' => '2024-12-12T10:30:00+08:00'
 ]

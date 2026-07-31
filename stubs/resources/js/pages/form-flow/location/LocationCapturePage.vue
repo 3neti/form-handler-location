@@ -1,35 +1,41 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
-import LocationCapture, { type LocationData, type LocationCaptureConfig } from './components/LocationCapture.vue';
-import PublicLayout from '@/layouts/PublicLayout.vue';
+import { router } from "@inertiajs/vue3";
+import LocationCapture, {
+  type LocationData,
+  type LocationCaptureConfig,
+} from "./components/LocationCapture.vue";
+import PublicLayout from "@/layouts/PublicLayout.vue";
+import type { FormFlowUiVariant } from "@/pages/form-flow/core/components/formFlowUiVariant";
 
 interface Props {
-    flow_id: string;
-    step: string;
-    config?: LocationCaptureConfig;
+  flow_id: string;
+  step: string;
+  config?: LocationCaptureConfig;
+  ui_variant?: FormFlowUiVariant | string | null;
 }
 
 const props = defineProps<Props>();
 
 function handleSubmit(locationData: LocationData) {
-    // Submit to FormFlowController
-    router.post(`/form-flow/${props.flow_id}/step/${props.step}`, {
-        data: locationData,
-    });
+  // Submit to FormFlowController
+  router.post(`/form-flow/${props.flow_id}/step/${props.step}`, {
+    data: locationData as unknown as Record<string, any>,
+  });
 }
 
 function handleCancel() {
-    // Cancel the flow
-    router.post(`/form-flow/${props.flow_id}/cancel`);
+  // Cancel the flow
+  router.post(`/form-flow/${props.flow_id}/cancel`);
 }
 </script>
 
 <template>
-    <PublicLayout>
-        <LocationCapture
-            :config="config"
-            @submit="handleSubmit"
-            @cancel="handleCancel"
-        />
-    </PublicLayout>
+  <PublicLayout>
+    <LocationCapture
+      :config="config"
+      :ui-variant="ui_variant"
+      @submit="handleSubmit"
+      @cancel="handleCancel"
+    />
+  </PublicLayout>
 </template>
