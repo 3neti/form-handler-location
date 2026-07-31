@@ -2,33 +2,34 @@
 
 namespace LBHurtado\FormHandlerLocation\Tests;
 
+use LBHurtado\FormHandlerLocation\LocationHandlerServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Spatie\LaravelData\LaravelDataServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
-
-    protected function getPackageProviders($app)
+    /**
+     * @return array<int, class-string>
+     */
+    protected function getPackageProviders($app): array
     {
         return [
-            \Spatie\LaravelData\LaravelDataServiceProvider::class,
-            \LBHurtado\FormHandlerLocation\LocationHandlerServiceProvider::class,
+            LaravelDataServiceProvider::class,
+            LocationHandlerServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    protected function getEnvironmentSetUp($app): void
     {
         $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
         $app['config']->set('database.default', 'testing');
-        
+        $app['config']->set('inertia.testing.ensure_pages_exist', false);
+
         // Laravel Data configuration
         $app['config']->set('data.validation_strategy', 'only_requests');
         $app['config']->set('data.max_transformation_depth', 6);
         $app['config']->set('data.throw_when_max_transformation_depth_reached', 6);
-        
+
         // Location handler configuration
         $app['config']->set('location-handler.opencage_api_key', 'test_key');
         $app['config']->set('location-handler.map_provider', 'google');

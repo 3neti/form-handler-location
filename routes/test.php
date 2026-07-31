@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use LBHurtado\FormFlowManager\Services\FormFlowService;
 use LBHurtado\FormFlowManager\Data\FormFlowInstructionsData;
+use LBHurtado\FormFlowManager\Services\FormFlowService;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,13 +19,13 @@ use LBHurtado\FormFlowManager\Data\FormFlowInstructionsData;
 
 /**
  * Test Route: Start location capture flow
- * 
+ *
  * Simulates main app (redeem-x) sending instructions to form-flow service
  */
 Route::get('/test/location/start', function (FormFlowService $flowService) {
     // Simulate what redeem-x would send to the form-flow microservice
     $instructions = FormFlowInstructionsData::from([
-        'flow_id' => 'test-location-' . uniqid(),
+        'flow_id' => 'test-location-'.uniqid(),
         'title' => 'Location Capture Test',
         'description' => 'Testing standalone location handler',
         'steps' => [
@@ -45,22 +45,22 @@ Route::get('/test/location/start', function (FormFlowService $flowService) {
             'on_cancel' => url('/test/location/cancelled'),
         ],
     ]);
-    
+
     // Start the flow
     $state = $flowService->startFlow($instructions);
-    
+
     // Redirect to the flow (browser follows)
     return redirect()->route('form-flow.show', ['flow_id' => $state['flow_id']]);
 })->name('test.location.start');
 
 /**
  * Callback Route: Handle completion
- * 
+ *
  * This is where main app (redeem-x) would receive the collected data
  */
 Route::post('/test/location/callback', function () {
     $data = request()->all();
-    
+
     return response()->json([
         'success' => true,
         'message' => 'Location data received by main app!',
@@ -74,7 +74,7 @@ Route::post('/test/location/callback', function () {
  */
 Route::post('/test/location/cancelled', function () {
     $data = request()->all();
-    
+
     return response()->json([
         'success' => true,
         'message' => 'Flow cancelled, main app notified',
@@ -101,6 +101,6 @@ Route::get('/test/location', function () {
             'Benefits: Separation of concerns, reusable, scalable',
         ],
     ];
-    
+
     return response()->json($instructions);
 })->name('test.location.index');

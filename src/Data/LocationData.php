@@ -8,7 +8,7 @@ use Spatie\LaravelData\Data;
 
 /**
  * Location Data
- * 
+ *
  * Represents captured location data from browser geolocation.
  */
 class LocationData extends Data

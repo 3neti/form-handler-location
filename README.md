@@ -14,7 +14,7 @@ A Form Flow Manager plugin for capturing user location using browser geolocation
 ## Installation
 
 ```bash
-composer require 3neti/form-handler-location
+composer require 3neti/form-handler-location:^1.2
 ```
 
 That's it! The handler automatically registers itself with the Form Flow Manager.
@@ -123,8 +123,8 @@ The handler returns the following data structure:
 ## Testing
 
 ```bash
-cd packages/form-handler-location
 composer test
+composer pint -- --test
 ```
 
 ### Test Coverage
@@ -206,8 +206,8 @@ redeem-x/                  (Host App)
 ## Requirements
 
 - PHP 8.2+
-- Laravel 12+
-- Form Flow Manager (`lbhurtado/form-flow-manager`)
+- Laravel 11, 12, or 13
+- 3neti/form-flow 1.8+
 - Browser with geolocation support
 
 ## API Keys
