@@ -103,6 +103,38 @@ test('location handler accepts formatted address', function () {
     expect($result['address_components'])->toHaveKey('city', 'Makati City');
 });
 
+test('location handler normalizes browser address evidence', function () {
+    $handler = new LocationHandler;
+    $step = FormFlowStepData::from([
+        'handler' => 'location',
+        'config' => [],
+    ]);
+
+    $request = Request::create('/test', 'POST', [
+        'data' => [
+            'latitude' => 14.5995,
+            'longitude' => 120.9842,
+            'address' => [
+                'formatted' => 'Makati City, Metro Manila, Philippines',
+                'city' => 'Makati City',
+                'state' => 'Metro Manila',
+                'country' => 'Philippines',
+            ],
+        ],
+    ]);
+
+    $result = $handler->handle($request, $step);
+
+    expect($result)
+        ->toHaveKey('formatted_address', 'Makati City, Metro Manila, Philippines')
+        ->and($result['address_components'])
+        ->toMatchArray([
+            'city' => 'Makati City',
+            'state' => 'Metro Manila',
+            'country' => 'Philippines',
+        ]);
+});
+
 /**
  * Test 6: handle() accepts optional snapshot
  */

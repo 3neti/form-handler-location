@@ -49,6 +49,8 @@ class LocationHandlerServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/test.php');
         }
 
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+
         // Publish configuration
         $this->publishes([
             __DIR__.'/../config/location-handler.php' => config_path('location-handler.php'),

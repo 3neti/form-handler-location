@@ -11,7 +11,12 @@ return [
     | Free tier: 2,500 requests/day
     |
     */
-    'opencage_api_key' => env('VITE_OPENCAGE_KEY', env('OPENCAGE_API_KEY')),
+    'opencage_api_key' => env('OPENCAGE_API_KEY', env('VITE_OPENCAGE_KEY')),
+
+    'opencage_endpoint' => env(
+        'OPENCAGE_ENDPOINT',
+        'https://api.opencagedata.com/geocode/v1/json'
+    ),
 
     /*
     |--------------------------------------------------------------------------
@@ -37,7 +42,7 @@ return [
     | Free tier: 50,000 requests/month
     |
     */
-    'mapbox_token' => env('VITE_MAPBOX_TOKEN', env('MAPBOX_TOKEN')),
+    'mapbox_token' => env('MAPBOX_TOKEN', env('VITE_MAPBOX_TOKEN')),
 
     /*
     |--------------------------------------------------------------------------
@@ -50,6 +55,14 @@ return [
     |
     */
     'google_maps_api_key' => env('GOOGLE_MAPS_API_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Provider Request Limits
+    |--------------------------------------------------------------------------
+    */
+    'connect_timeout' => env('LOCATION_HANDLER_CONNECT_TIMEOUT', 5),
+    'request_timeout' => env('LOCATION_HANDLER_REQUEST_TIMEOUT', 10),
 
     /*
     |--------------------------------------------------------------------------

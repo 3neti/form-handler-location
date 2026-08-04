@@ -28,6 +28,12 @@ class LocationHandler implements FormHandlerInterface
         // Extract data from 'data' key if present (from form submission)
         $inputData = $request->input('data', $request->all());
 
+        if (is_array($inputData['address'] ?? null)) {
+            $inputData['formatted_address'] ??= $inputData['address']['formatted'] ?? null;
+            $inputData['address_components'] ??= $inputData['address'];
+            unset($inputData['address']);
+        }
+
         // Validate using Laravel's validator directly
         $validated = validator($inputData, [
             'latitude' => 'required|numeric|between:-90,90',
@@ -57,10 +63,7 @@ class LocationHandler implements FormHandlerInterface
             'flow_id' => $context['flow_id'] ?? null,
             'step' => (string) ($context['step_index'] ?? 0),
             'config' => array_merge([
-                'opencage_api_key' => config('location-handler.opencage_api_key'),
                 'map_provider' => config('location-handler.map_provider', 'google'),
-                'mapbox_token' => config('location-handler.mapbox_token'),
-                'google_maps_api_key' => config('location-handler.google_maps_api_key'),
                 'capture_snapshot' => config('location-handler.capture_snapshot', true),
                 'require_address' => config('location-handler.require_address', false),
             ], $step->config),

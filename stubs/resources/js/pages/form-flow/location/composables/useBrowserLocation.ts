@@ -1,5 +1,4 @@
 import { ref } from 'vue';
-import axios from 'axios';
 
 /**
  * LocationData DTO
@@ -25,10 +24,9 @@ export interface GeocodedAddressData {
 
 /**
  * Composable to fetch location from the browser (with freshness, session cache, and force refresh)
- * @param apiKey OpenCage API key
  * @param maxAgeMs Optional max cache age in milliseconds (default: 5 minutes)
  */
-export function useBrowserLocation(apiKey: string, maxAgeMs = 5 * 60 * 1000) {
+export function useBrowserLocation(maxAgeMs = 5 * 60 * 1000) {
     const location = ref<LocationData | null>(null);
     const loading = ref(false);
     const error = ref<string | null>(null);
@@ -69,39 +67,12 @@ export function useBrowserLocation(apiKey: string, maxAgeMs = 5 * 60 * 1000) {
                 async (position) => {
                     const { latitude, longitude, accuracy } = position.coords;
                     const timestamp = new Date(position.timestamp).toISOString();
-                    let address: GeocodedAddressData | null = null;
-
-                    // Only attempt geocoding if API key is provided
-                    if (apiKey) {
-                        try {
-                            const response = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
-                                params: {
-                                    q: `${latitude},${longitude}`,
-                                    key: apiKey,
-                                },
-                                withCredentials: false, // Disable credentials for external API to avoid CORS issues
-                            });
-
-                            if (response.data.results && response.data.results.length > 0) {
-                                const result = response.data.results[0];
-                                address = {
-                                    formatted: result.formatted || null,
-                                    city: result.components.city || result.components.town || null,
-                                    state: result.components.state || null,
-                                    country: result.components.country || null,
-                                };
-                            }
-                        } catch (e: any) {
-                            console.error('[useBrowserLocation] Error getting location name:', e.message);
-                        }
-                    }
-
                     const finalLocation: LocationData = {
                         latitude,
                         longitude,
                         timestamp,
                         accuracy,
-                        address,
+                        address: null,
                     };
 
                     location.value = finalLocation;

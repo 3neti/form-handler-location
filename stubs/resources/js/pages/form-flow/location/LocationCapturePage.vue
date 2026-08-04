@@ -32,6 +32,7 @@ function handleCancel() {
 <template>
   <PublicLayout>
     <LocationCapture
+      :flow-id="flow_id"
       :config="config"
       :ui-variant="ui_variant"
       @submit="handleSubmit"

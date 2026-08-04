@@ -32,7 +32,8 @@ abstract class TestCase extends BaseTestCase
 
         // Location handler configuration
         $app['config']->set('location-handler.opencage_api_key', 'test_key');
-        $app['config']->set('location-handler.map_provider', 'google');
+        $app['config']->set('location-handler.map_provider', 'mapbox');
+        $app['config']->set('location-handler.mapbox_token', 'test_mapbox_token');
         $app['config']->set('location-handler.capture_snapshot', true);
         $app['config']->set('location-handler.require_address', false);
     }

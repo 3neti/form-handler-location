@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import LocationEvidenceController from "@/actions/LBHurtado/FormHandlerLocation/Http/Controllers/LocationEvidenceController";
 import { useBrowserLocation } from "../composables/useBrowserLocation";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,10 +11,7 @@ import FormFlowScreen from "@/pages/form-flow/core/components/FormFlowScreen.vue
 import type { FormFlowUiVariant } from "@/pages/form-flow/core/components/formFlowUiVariant";
 
 export interface LocationCaptureConfig {
-  opencage_api_key?: string;
   map_provider?: "mapbox" | "google";
-  mapbox_token?: string;
-  google_maps_api_key?: string;
   capture_snapshot?: boolean;
   require_address?: boolean;
 }
@@ -33,6 +31,7 @@ export interface LocationData {
 }
 
 interface Props {
+  flowId: string;
   config?: LocationCaptureConfig;
   modelValue?: LocationData | null;
   uiVariant?: FormFlowUiVariant | string | null;
@@ -53,11 +52,6 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 // Reactive config values
-const opencageKey = computed(() => props.config?.opencage_api_key || "");
-const mapProvider = computed(() => props.config?.map_provider || "mapbox");
-const mapboxToken = computed(() => props.config?.mapbox_token || "");
-const googleMapsKey = computed(() => props.config?.google_maps_api_key || "");
-const captureSnapshot = computed(() => props.config?.capture_snapshot ?? true);
 const requireAddress = computed(() => props.config?.require_address ?? false);
 const isImmersive = computed(() => props.uiVariant === "immersive");
 const formClass = computed(() =>
@@ -74,12 +68,11 @@ const {
   loading: geoLoading,
   error: geoError,
   getLocation,
-} = useBrowserLocation(opencageKey.value, 3 * 60 * 1000);
+} = useBrowserLocation(3 * 60 * 1000);
 
 const geoAlertRef = ref<InstanceType<typeof GeoPermissionAlert> | null>(null);
 const apiError = ref<string | null>(null);
 const coordinatesCopied = ref(false);
-const mapSnapshot = ref<string | null>(null);
 
 const parsedLocation = computed(() => {
   return location.value;
@@ -89,28 +82,7 @@ const formattedAddress = computed(() => {
   return parsedLocation.value?.address?.formatted || "";
 });
 
-const staticMapUrl = computed(() => {
-  if (!location.value) return "";
-
-  const { latitude, longitude } = location.value;
-  const zoom = 16;
-  const size = 600;
-
-  if (
-    mapProvider.value === "mapbox" &&
-    mapboxToken.value &&
-    mapboxToken.value !== "your_actual_token_here"
-  ) {
-    return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+ff0000(${longitude},${latitude})/${longitude},${latitude},${zoom},0/${size}x300@2x?access_token=${mapboxToken.value}`;
-  }
-
-  // Fallback: Google Maps static
-  const url = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=${zoom}&size=${size}x300&markers=color:red%7C${latitude},${longitude}`;
-  if (googleMapsKey.value) {
-    return `${url}&key=${googleMapsKey.value}`;
-  }
-  return url;
-});
+const mapImage = computed(() => location.value?.map || "");
 
 async function fetchLocation() {
   const data = await getLocation(false);
@@ -122,12 +94,57 @@ async function fetchLocation() {
 
   if (!data) {
     apiError.value = "Failed to get location. Please try again.";
-  } else if (requireAddress.value && !data.address?.formatted) {
-    apiError.value =
-      "Could not determine your address. Please try again or enable location services.";
   } else {
-    // Emit the location data
-    emit("update:modelValue", data);
+    await enrichLocation(data);
+  }
+}
+
+async function enrichLocation(data: LocationData): Promise<void> {
+  apiError.value = null;
+
+  try {
+    const route = LocationEvidenceController({ flowId: props.flowId });
+    const response = await fetch(route.url, {
+      method: route.method.toUpperCase(),
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        ...csrfHeader(),
+      },
+      body: JSON.stringify({
+        latitude: data.latitude,
+        longitude: data.longitude,
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok || !payload?.data) {
+      throw new Error(
+        typeof payload?.message === "string"
+          ? payload.message
+          : "Location evidence is temporarily unavailable. Please retry.",
+      );
+    }
+
+    const enriched: LocationData = {
+      ...data,
+      address: payload.data.address ?? null,
+      map: typeof payload.data.map === "string" ? payload.data.map : undefined,
+    };
+
+    if (requireAddress.value && !enriched.address?.formatted) {
+      throw new Error("No address could be resolved for this location.");
+    }
+
+    location.value = enriched;
+    emit("update:modelValue", enriched);
+  } catch (error) {
+    apiError.value =
+      error instanceof Error
+        ? error.message
+        : "Location evidence is temporarily unavailable. Please retry.";
   }
 }
 
@@ -141,40 +158,6 @@ function copyCoordinates() {
       coordinatesCopied.value = false;
     }, 2000);
   });
-}
-
-async function captureMapSnapshot(): Promise<string | null> {
-  if (!staticMapUrl.value || !captureSnapshot.value) return null;
-
-  try {
-    const response = await fetch(staticMapUrl.value);
-    const blob = await response.blob();
-
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch (err) {
-    console.error("[LocationCapture] Failed to capture map snapshot:", err);
-    return null;
-  }
-}
-
-async function handleMapImageLoad() {
-  if (!captureSnapshot.value) return;
-
-  mapSnapshot.value = await captureMapSnapshot();
-
-  // Update the location with the captured map artifact.
-  if (mapSnapshot.value && location.value) {
-    const locationWithSnapshot = {
-      ...location.value,
-      map: mapSnapshot.value,
-    };
-    emit("update:modelValue", locationWithSnapshot);
-  }
 }
 
 function handleSubmit() {
@@ -191,13 +174,15 @@ function handleSubmit() {
 
   apiError.value = null;
 
-  // Prepare location data with the captured map artifact, when available.
-  const locationWithSnapshot: LocationData = {
-    ...location.value,
-    ...(mapSnapshot.value && { map: mapSnapshot.value }),
-  };
+  emit("submit", location.value);
+}
 
-  emit("submit", locationWithSnapshot);
+function csrfHeader(): Record<string, string> {
+  const token = document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute("content");
+
+  return token ? { "X-CSRF-TOKEN": token } : {};
 }
 
 function handleCancel() {
@@ -255,13 +240,12 @@ onMounted(() => {
       <!-- Static Map & Location Info (when location captured) -->
       <div v-if="parsedLocation" class="flex min-h-0 flex-1 flex-col gap-4">
         <!-- Map Image -->
-        <div v-if="staticMapUrl" class="rounded-lg border overflow-hidden">
+        <div v-if="mapImage" class="rounded-lg border overflow-hidden">
           <img
-            :src="staticMapUrl"
+            :src="mapImage"
             alt="Map showing your location"
             :class="mapImageClass"
             loading="lazy"
-            @load="handleMapImageLoad"
           />
         </div>
 
