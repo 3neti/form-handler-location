@@ -35,6 +35,7 @@ interface Props {
   config?: LocationCaptureConfig;
   modelValue?: LocationData | null;
   uiVariant?: FormFlowUiVariant | string | null;
+  previewMode?: boolean;
 }
 
 interface Emits {
@@ -47,6 +48,7 @@ const props = withDefaults(defineProps<Props>(), {
   config: () => ({}),
   modelValue: null,
   uiVariant: "default",
+  previewMode: false,
 });
 
 const emit = defineEmits<Emits>();
@@ -85,6 +87,7 @@ const formattedAddress = computed(() => {
 const mapImage = computed(() => location.value?.map || "");
 
 async function fetchLocation() {
+  if (props.previewMode) return;
   const data = await getLocation(false);
 
   if (geoError.value === "PERMISSION_DENIED") {
@@ -161,6 +164,7 @@ function copyCoordinates() {
 }
 
 function handleSubmit() {
+  if (props.previewMode) return;
   if (!location.value) {
     apiError.value = "Please capture your location first.";
     return;
@@ -186,6 +190,7 @@ function csrfHeader(): Record<string, string> {
 }
 
 function handleCancel() {
+  if (props.previewMode) return;
   emit("cancel");
 }
 

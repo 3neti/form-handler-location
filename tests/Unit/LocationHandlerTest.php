@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Inertia\Response;
 use LBHurtado\FormFlowManager\Contracts\FormHandlerInterface;
+use LBHurtado\FormFlowManager\Contracts\FormHandlerPreviewInterface;
 use LBHurtado\FormFlowManager\Data\FormFlowStepData;
 use LBHurtado\FormHandlerLocation\LocationHandler;
 
@@ -21,6 +22,16 @@ test('location handler implements form handler interface', function () {
     $handler = new LocationHandler;
 
     expect($handler)->toBeInstanceOf(FormHandlerInterface::class);
+});
+
+test('location preview uses the production screen in inert mode', function () {
+    $preview = (new LocationHandler)->preview(
+        FormFlowStepData::from(['handler' => 'location', 'config' => []]),
+    );
+
+    expect(new LocationHandler)->toBeInstanceOf(FormHandlerPreviewInterface::class)
+        ->and($preview['component'])->toBe('form-flow/location/LocationCapturePage')
+        ->and($preview['props']['preview_mode'])->toBeTrue();
 });
 
 /**
@@ -258,4 +269,9 @@ test('location handler output can be cast to LocationData', function () {
 
     // The result should be compatible with LocationData
     expect($result)->toHaveKeys(['latitude', 'longitude', 'timestamp']);
+});
+test('published claim screen fails closed in preview mode', function () {
+    $source = file_get_contents(dirname(__DIR__, 2).'/stubs/resources/js/pages/form-flow/location/components/LocationCapture.vue');
+
+    expect($source)->toContain('props.previewMode');
 });

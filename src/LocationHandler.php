@@ -7,6 +7,7 @@ namespace LBHurtado\FormHandlerLocation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use LBHurtado\FormFlowManager\Contracts\FormHandlerInterface;
+use LBHurtado\FormFlowManager\Contracts\FormHandlerPreviewInterface;
 use LBHurtado\FormFlowManager\Data\FormFlowStepData;
 use LBHurtado\FormHandlerLocation\Data\LocationData;
 
@@ -16,7 +17,7 @@ use LBHurtado\FormHandlerLocation\Data\LocationData;
  * Captures user's geographic location using browser geolocation API.
  * Supports reverse geocoding and map snapshots.
  */
-class LocationHandler implements FormHandlerInterface
+class LocationHandler implements FormHandlerInterface, FormHandlerPreviewInterface
 {
     public function getName(): string
     {
@@ -57,9 +58,17 @@ class LocationHandler implements FormHandlerInterface
 
     public function render(FormFlowStepData $step, array $context = [])
     {
-        // Renders page at resources/js/pages/form-flow/location/LocationCapturePage.vue
+        return Inertia::render('form-flow/location/LocationCapturePage', $this->props($step, $context));
+    }
 
-        return Inertia::render('form-flow/location/LocationCapturePage', [
+    public function preview(FormFlowStepData $step, array $context = []): array
+    {
+        return ['component' => 'form-flow/location/LocationCapturePage', 'props' => $this->props($step, array_merge($context, ['preview_mode' => true]))];
+    }
+
+    protected function props(FormFlowStepData $step, array $context): array
+    {
+        return [
             'flow_id' => $context['flow_id'] ?? null,
             'step' => (string) ($context['step_index'] ?? 0),
             'config' => array_merge([
@@ -68,7 +77,8 @@ class LocationHandler implements FormHandlerInterface
                 'require_address' => config('location-handler.require_address', false),
             ], $step->config),
             'ui_variant' => $step->config['ui_variant'] ?? config('form-flow.ui.variant', 'default'),
-        ]);
+            'preview_mode' => (bool) ($context['preview_mode'] ?? false),
+        ];
     }
 
     public function getConfigSchema(): array

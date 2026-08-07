@@ -12,11 +12,13 @@ interface Props {
   step: string;
   config?: LocationCaptureConfig;
   ui_variant?: FormFlowUiVariant | string | null;
+  preview_mode?: boolean;
 }
 
 const props = defineProps<Props>();
 
 function handleSubmit(locationData: LocationData) {
+  if (props.preview_mode) return;
   // Submit to FormFlowController
   router.post(`/form-flow/${props.flow_id}/step/${props.step}`, {
     data: locationData as unknown as Record<string, any>,
@@ -24,6 +26,7 @@ function handleSubmit(locationData: LocationData) {
 }
 
 function handleCancel() {
+  if (props.preview_mode) return;
   // Cancel the flow
   router.post(`/form-flow/${props.flow_id}/cancel`);
 }
@@ -35,6 +38,7 @@ function handleCancel() {
       :flow-id="flow_id"
       :config="config"
       :ui-variant="ui_variant"
+      :preview-mode="preview_mode"
       @submit="handleSubmit"
       @cancel="handleCancel"
     />
