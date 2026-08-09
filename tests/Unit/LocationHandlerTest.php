@@ -67,7 +67,7 @@ test('location handler config schema is valid', function () {
     ]);
 
     expect($schema['ui_variant'])->toContain('default,compact,immersive')
-        ->and($schema['action_placement'])->toContain('inline,bottom,bottom_sticky');
+        ->and($schema['action_placement'])->toContain('inline,bottom,bottom_sticky,viewport_bottom');
 });
 
 /**

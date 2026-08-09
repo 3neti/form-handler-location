@@ -17,7 +17,7 @@ interface Props {
   step: string;
   config?: LocationCaptureConfig;
   ui_variant?: FormFlowUiVariant | string | null;
-  action_placement?: "inline" | "bottom" | "bottom_sticky" | string | null;
+  action_placement?: "inline" | "bottom" | "bottom_sticky" | "viewport_bottom" | string | null;
   ui_layout?: Record<string, unknown> | null;
   app_name?: string | null;
   app_logo?: string | null;

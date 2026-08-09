@@ -96,7 +96,7 @@ class LocationHandler implements FormHandlerInterface, FormHandlerPreviewInterfa
             'capture_snapshot' => 'boolean',
             'require_address' => 'boolean',
             'ui_variant' => 'nullable|string|in:default,compact,immersive',
-            'action_placement' => 'nullable|string|in:inline,bottom,bottom_sticky',
+            'action_placement' => 'nullable|string|in:inline,bottom,bottom_sticky,viewport_bottom',
             'ui_layout' => 'nullable|array',
             'app_name' => 'nullable|string',
             'app_logo' => 'nullable|string',

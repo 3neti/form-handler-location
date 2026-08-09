@@ -40,7 +40,7 @@ interface Props {
   config?: LocationCaptureConfig;
   modelValue?: LocationData | null;
   uiVariant?: FormFlowUiVariant | string | null;
-  actionPlacement?: "inline" | "bottom" | "bottom_sticky" | string | null;
+  actionPlacement?: "inline" | "bottom" | "bottom_sticky" | "viewport_bottom" | string | null;
   uiLayout?: Record<string, unknown> | null;
   appName?: string | null;
   appLogo?: string | null;
@@ -228,6 +228,7 @@ onMounted(() => {
     :app-logo="appLogo"
     :package-versions="packageVersions"
     :show-package-versions="showPackageVersions"
+    version-context="location"
   >
     <template #icon>
       <MapPin class="h-5 w-5" />
