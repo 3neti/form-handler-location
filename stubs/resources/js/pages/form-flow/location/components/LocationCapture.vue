@@ -30,11 +30,22 @@ export interface LocationData {
   map?: string;
 }
 
+interface PackageVersion {
+  name: string;
+  version: string;
+}
+
 interface Props {
   flowId: string;
   config?: LocationCaptureConfig;
   modelValue?: LocationData | null;
   uiVariant?: FormFlowUiVariant | string | null;
+  actionPlacement?: "inline" | "bottom" | "bottom_sticky" | string | null;
+  uiLayout?: Record<string, unknown> | null;
+  appName?: string | null;
+  appLogo?: string | null;
+  packageVersions?: PackageVersion[] | Record<string, string> | null;
+  showPackageVersions?: boolean;
   previewMode?: boolean;
 }
 
@@ -48,6 +59,12 @@ const props = withDefaults(defineProps<Props>(), {
   config: () => ({}),
   modelValue: null,
   uiVariant: "default",
+  actionPlacement: null,
+  uiLayout: null,
+  appName: null,
+  appLogo: null,
+  packageVersions: null,
+  showPackageVersions: false,
   previewMode: false,
 });
 
@@ -207,6 +224,10 @@ onMounted(() => {
     title="Location Required"
     description="Please share your current location to continue"
     :variant="uiVariant"
+    :app-name="appName"
+    :app-logo="appLogo"
+    :package-versions="packageVersions"
+    :show-package-versions="showPackageVersions"
   >
     <template #icon>
       <MapPin class="h-5 w-5" />
@@ -304,6 +325,7 @@ onMounted(() => {
 
       <FormFlowActions
         :variant="uiVariant"
+        :action-placement="actionPlacement"
         :primary-disabled="!location || geoLoading"
         :secondary-disabled="geoLoading"
         @secondary="handleCancel"

@@ -58,9 +58,16 @@ test('location handler config schema is valid', function () {
         'capture_snapshot',
         'require_address',
         'ui_variant',
+        'action_placement',
+        'ui_layout',
+        'app_name',
+        'app_logo',
+        'package_versions',
+        'show_package_versions',
     ]);
 
-    expect($schema['ui_variant'])->toContain('default,compact,immersive');
+    expect($schema['ui_variant'])->toContain('default,compact,immersive')
+        ->and($schema['action_placement'])->toContain('inline,bottom,bottom_sticky');
 });
 
 /**

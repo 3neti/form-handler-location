@@ -77,6 +77,12 @@ class LocationHandler implements FormHandlerInterface, FormHandlerPreviewInterfa
                 'require_address' => config('location-handler.require_address', false),
             ], $step->config),
             'ui_variant' => $step->config['ui_variant'] ?? config('form-flow.ui.variant', 'default'),
+            'action_placement' => $step->config['action_placement'] ?? null,
+            'ui_layout' => $step->config['ui_layout'] ?? [],
+            'app_name' => $step->config['app_name'] ?? null,
+            'app_logo' => $step->config['app_logo'] ?? null,
+            'package_versions' => $step->config['package_versions'] ?? [],
+            'show_package_versions' => (bool) ($step->config['show_package_versions'] ?? false),
             'preview_mode' => (bool) ($context['preview_mode'] ?? false),
         ];
     }
@@ -90,6 +96,12 @@ class LocationHandler implements FormHandlerInterface, FormHandlerPreviewInterfa
             'capture_snapshot' => 'boolean',
             'require_address' => 'boolean',
             'ui_variant' => 'nullable|string|in:default,compact,immersive',
+            'action_placement' => 'nullable|string|in:inline,bottom,bottom_sticky',
+            'ui_layout' => 'nullable|array',
+            'app_name' => 'nullable|string',
+            'app_logo' => 'nullable|string',
+            'package_versions' => 'nullable|array',
+            'show_package_versions' => 'nullable|boolean',
         ];
     }
 }
