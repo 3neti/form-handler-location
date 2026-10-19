@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FormFlowNotice from "@/pages/form-flow/core/components/FormFlowNotice.vue";
 import { ref, computed, onMounted } from "vue";
 import LocationEvidenceController from "@/actions/LBHurtado/FormHandlerLocation/Http/Controllers/LocationEvidenceController";
 import { useBrowserLocation } from "../composables/useBrowserLocation";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, MapPin } from "lucide-vue-next";
 import GeoPermissionAlert from "./GeoPermissionAlert.vue";
+import FormFlowAction from "@/pages/form-flow/core/components/FormFlowAction.vue";
 import FormFlowActions from "@/pages/form-flow/core/components/FormFlowActions.vue";
 import FormFlowScreen from "@/pages/form-flow/core/components/FormFlowScreen.vue";
 import type { FormFlowUiVariant } from "@/pages/form-flow/core/components/formFlowUiVariant";
@@ -40,7 +42,13 @@ interface Props {
   config?: LocationCaptureConfig;
   modelValue?: LocationData | null;
   uiVariant?: FormFlowUiVariant | string | null;
-  actionPlacement?: "inline" | "bottom" | "bottom_sticky" | "viewport_bottom" | string | null;
+  actionPlacement?:
+    | "inline"
+    | "bottom"
+    | "bottom_sticky"
+    | "viewport_bottom"
+    | string
+    | null;
   uiLayout?: Record<string, unknown> | null;
   appName?: string | null;
   appLogo?: string | null;
@@ -235,12 +243,11 @@ onMounted(() => {
     </template>
 
     <template #alert>
-      <Alert v-if="apiError" variant="destructive" class="mb-6">
-        <AlertCircle class="h-4 w-4" />
+      <FormFlowNotice v-if="apiError" class="mb-6" role="error">
         <AlertDescription>
           {{ apiError }}
         </AlertDescription>
-      </Alert>
+      </FormFlowNotice>
     </template>
 
     <form @submit.prevent="handleSubmit" :class="formClass">
@@ -253,21 +260,26 @@ onMounted(() => {
         <p class="text-sm text-muted-foreground text-center">
           We need to capture your current location to continue
         </p>
-        <Button
+        <FormFlowAction
           type="button"
           @click="fetchLocation"
           :disabled="geoLoading"
           size="lg"
-        >
-          <Loader2 v-if="geoLoading" class="h-4 w-4 animate-spin mr-2" />
-          {{ geoLoading ? "Getting Location..." : "Capture My Location" }}
-        </Button>
+          role="capture"
+          label="Capture My Location"
+          :processing="geoLoading"
+          processing-label="Getting Location..."
+        />
       </div>
 
       <!-- Static Map & Location Info (when location captured) -->
       <div v-if="parsedLocation" class="flex min-h-0 flex-1 flex-col gap-4">
         <!-- Map Image -->
-        <div v-if="mapImage" class="rounded-lg border overflow-hidden">
+        <div
+          v-if="mapImage"
+          data-flow-capture-surface
+          class="rounded-lg border overflow-hidden"
+        >
           <img
             :src="mapImage"
             alt="Map showing your location"
@@ -325,6 +337,8 @@ onMounted(() => {
       </div>
 
       <FormFlowActions
+        primary-role="continue"
+        secondary-role="cancel"
         :variant="uiVariant"
         :action-placement="actionPlacement"
         :primary-disabled="!location || geoLoading"

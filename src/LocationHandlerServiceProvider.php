@@ -6,6 +6,7 @@ namespace LBHurtado\FormHandlerLocation;
 
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use LBHurtado\FormFlowManager\Services\FormFlowPresentationResolver;
 use LBHurtado\FormHandlerLocation\Console\InstallLocationHandlerCommand;
 
 /**
@@ -37,6 +38,8 @@ class LocationHandlerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app(FormFlowPresentationResolver::class)->registerScreens(['location']);
+
         // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
